@@ -33,15 +33,14 @@
           <h2 id="ask-title">你想了解什么？</h2>
           <form id="search-form" role="search" autocomplete="off">
             <div class="search-wrap">
-              <label class="sr-only" for="question">输入制度问题</label>
+              <label class="sr-only" for="question">输入制度问题或关键词</label>
               <span class="search-icon" aria-hidden="true">⌕</span>
-              <input id="question" name="q" type="search" placeholder="例如：出差伙食补助每天多少钱？" maxlength="120" aria-controls="suggestions" aria-expanded="false">
+              <input id="question" name="q" type="search" placeholder="输入问题或关键词，例如：办公室职责" maxlength="120" aria-controls="suggestions" aria-expanded="false">
               <button type="submit" class="search-button" aria-label="查询">查询 <span aria-hidden="true">→</span></button>
             </div>
             <div id="suggestions" class="suggestions" role="listbox" hidden></div>
           </form>
-          <div class="search-modes" aria-label="检索方式"><button id="mode-qa" class="active" type="button" aria-pressed="true">问答速查</button><button id="mode-original" type="button" aria-pressed="false">原文关键词</button></div>
-          <p class="search-hint">问答速查提供已核对结论；原文关键词只检索脱敏制度 PDF 和脱敏指引摘录。多个关键词用空格或顿号分隔。</p>
+          <p class="search-hint">输入问题或关键词即可查询；有已核对答案时同时显示原文命中。多个关键词用空格或顿号分隔。</p>
           <div id="quick-hot" class="quick-hot" aria-label="快速查看高频问题"></div>
 
           <div id="answer-area" class="answer-area" aria-live="polite">

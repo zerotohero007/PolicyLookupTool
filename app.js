@@ -10,12 +10,9 @@
   const categoryRow = document.getElementById('category-row');
   const hotList = document.getElementById('hot-list');
   const quickHot = document.getElementById('quick-hot');
-  const modeQa = document.getElementById('mode-qa');
-  const modeOriginal = document.getElementById('mode-original');
   const dateLabel = '2026 年 12 月 1 日';
   const obsolete = [/长期出差申请单/, /每[两2]个?月.*往返/, /协议酒店/, /住宿.*统筹/, /加班申请单/, /加班补贴/, /报销凭证粘贴纸/];
   let category = '全部';
-  let mode = 'qa';
 
   function norm(s) { return String(s || '').toLowerCase().replace(/[\s，。？！,.?!：:、（）()·—–\-“”‘’"'；;\/\\\[\]{}]/g, ''); }
   function isObsolete(q) { return obsolete.some(re => re.test(q)); }
@@ -105,7 +102,6 @@
   function renderOriginal(hits, query) {
     const section = elt('section','original-results');
     section.append(elt('div','result-label',`原文关键词  /  ${hits.length} 处命中`));
-    if(isObsolete(query))section.append(elt('p','original-old-note','该词涉及已删除的旧规定。下列原文命中仅供定位，不能作为现行报销结论。'));
     section.append(elt('p','original-note','仅按脱敏文件文字定位，不自动判断条款是否适用。制度 PDF 为图片式文件，检索文字由 OCR 生成，请打开原页核对。'));
     const list = elt('div','original-list');
     section.append(list);
@@ -131,15 +127,6 @@
     more.type = 'button';more.onclick = addMore;section.append(more);
     addMore();answerArea.append(section);
   }
-  function renderOriginalEmpty() {
-    answerArea.replaceChildren();
-    answerArea.append(elt('div','result-label','原文关键词  /  无命中'));
-    const card = elt('div','answer-card fallback');
-    card.append(elt('h3','','未在脱敏文件中找到该关键词'),elt('p','','请改用制度原文中的关键名词，或减少关键词后重试。检索范围仅为脱敏制度 PDF 和脱敏填报指引摘录；PDF 图片文字可能存在 OCR 识别误差。'));
-    const row = elt('div','source-row');
-    row.append(sourceLink({page:1},'查看脱敏制度 ↗'),sourceLink({source:'guide',anchor:'lodging'},'查看脱敏指引 ↗'));
-    card.append(row);answerArea.append(card);
-  }
   function renderHot() {
     hotList.replaceChildren();
     const pool = category === '全部' ? faqs.filter(f => f.hot).sort((a,b)=>a.hot-b.hot) : faqs.filter(f => f.category === category);
@@ -163,7 +150,6 @@
     });
   }
   function renderSuggestions(query) {
-    if (mode === 'original') { suggestions.hidden=true;input.setAttribute('aria-expanded','false');return; }
     const matches=search(query).slice(0,5);suggestions.replaceChildren();
     if (!query.trim() || !matches.length) { suggestions.hidden=true;input.setAttribute('aria-expanded','false');return; }
     matches.forEach(({faq})=>{
@@ -213,56 +199,29 @@
     input.value=query;suggestions.hidden=true;input.setAttribute('aria-expanded','false');
     const matches=search(query);
     const original=searchOriginal(query);
-    if (mode === 'original') {
-      if (original.length) { answerArea.replaceChildren();renderOriginal(original,query); }
-      else renderOriginalEmpty();
-    } else {
-      if (isObsolete(query)) renderFallback([],query);
-      else if (direct) renderAnswer(direct,matches);
-      else if(matches.length && (matches[0].score>=15 || (matches.length===1 && matches[0].score>=10))) renderAnswer(matches[0].faq,matches);
-      else if(original.length) {
-        answerArea.replaceChildren();
-        answerArea.append(elt('div','result-label','QUERY RESULT  /  原文定位'));
-        answerArea.append(elt('p','original-intro','未匹配到已核对的问答结论。以下是脱敏原文命中，请打开原页核对适用条件。'));
-      } else renderFallback(matches,query);
-      if (original.length && !isObsolete(query)) renderOriginal(original,query);
-    }
+    if (isObsolete(query)) renderFallback([],query);
+    else if (direct) renderAnswer(direct,matches);
+    else if(matches.length && (matches[0].score>=15 || (matches.length===1 && matches[0].score>=10))) renderAnswer(matches[0].faq,matches);
+    else if(original.length) {
+      answerArea.replaceChildren();
+      answerArea.append(elt('div','result-label','QUERY RESULT  /  原文定位'));
+      answerArea.append(elt('p','original-intro','未匹配到已核对的问答结论。以下是脱敏原文命中，请打开原页核对适用条件。'));
+    } else renderFallback(matches,query);
+    if (original.length && !isObsolete(query)) renderOriginal(original,query);
     if (scroll) answerArea.scrollIntoView({behavior:'smooth',block:'start'});
   }
-  function updateMode() {
-    modeQa.classList.toggle('active',mode==='qa');
-    modeOriginal.classList.toggle('active',mode==='original');
-    modeQa.setAttribute('aria-pressed',String(mode==='qa'));
-    modeOriginal.setAttribute('aria-pressed',String(mode==='original'));
-    input.placeholder=mode==='original'?'例如：办公室、住宿限额、退票费':'例如：出差伙食补助每天多少钱？';
-  }
-  function setMode(next) {
-    mode=next;updateMode();suggestions.hidden=true;
-    const query=input.value.trim();
-    if(query) {
-      show(query,null,false);
-      const url=new URL(window.location.href);
-      if(mode==='original')url.searchParams.set('mode','original');else url.searchParams.delete('mode');
-      history.replaceState({},'',url);
-    }
-  }
   function ask(query,direct) {
-    if(direct){mode='qa';updateMode();}
     show(query,direct,true);
     const url=new URL(window.location.href);url.searchParams.set('q',query);
-    if(mode==='original')url.searchParams.set('mode','original');else url.searchParams.delete('mode');
+    url.searchParams.delete('mode');
     history.replaceState({},'',url);
   }
-  modeQa.addEventListener('click',()=>setMode('qa'));
-  modeOriginal.addEventListener('click',()=>setMode('original'));
   input.addEventListener('input',()=>renderSuggestions(input.value));
   input.addEventListener('focus',()=>renderSuggestions(input.value));
   document.addEventListener('click',e=>{if(!form.contains(e.target)){suggestions.hidden=true;input.setAttribute('aria-expanded','false');}});
   form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim())ask(input.value.trim());});
   renderCategories();renderHot();renderQuickHot();
   const params=new URLSearchParams(window.location.search);
-  if(params.get('mode')==='original')mode='original';
-  updateMode();
   const initial=params.get('q');
   if(initial) show(initial,null,false);
   window.PolicySearch={search,searchOriginal,sourceTerms,score,isObsolete};
