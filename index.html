@@ -9,6 +9,7 @@
   <meta name="description" content="内部制度问答试用原型，按条款提供差旅费查询结果。">
   <link rel="stylesheet" href="./style.css">
   <script defer src="./data.js"></script>
+  <script defer src="./search-index.js"></script>
   <script defer src="./app.js"></script>
 </head>
 <body>
@@ -22,7 +23,7 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="eyebrow"><span class="eyebrow-dot"></span> 差旅制度 · 2026 年 12 月发布版</div>
         <h1 id="hero-title">出差政策，<br><em>一问即查。</em></h1>
-        <p class="hero-copy">用一句话查询审批、补助与报销规则。每条答复均可回到制度原文核对。</p>
+        <p class="hero-copy">用一句话查询审批、补助与报销规则，也可直接按关键词检索脱敏原文。</p>
         <div class="hero-meta"><span>实施日期 <b>2026.12.01</b></span><span class="meta-divider"></span><a href="./制度原文_脱敏.pdf" target="_blank" rel="noopener">查看脱敏原文 <span aria-hidden="true">↗</span></a></div>
       </section>
 
@@ -39,7 +40,8 @@
             </div>
             <div id="suggestions" class="suggestions" role="listbox" hidden></div>
           </form>
-          <p class="search-hint">可直接输入问题，也可点击快捷问题或高频列表。</p>
+          <div class="search-modes" aria-label="检索方式"><button id="mode-qa" class="active" type="button" aria-pressed="true">问答速查</button><button id="mode-original" type="button" aria-pressed="false">原文关键词</button></div>
+          <p class="search-hint">问答速查提供已核对结论；原文关键词只检索脱敏制度 PDF 和脱敏指引摘录。多个关键词用空格或顿号分隔。</p>
           <div id="quick-hot" class="quick-hot" aria-label="快速查看高频问题"></div>
 
           <div id="answer-area" class="answer-area" aria-live="polite">
